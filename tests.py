@@ -12,12 +12,15 @@ def test_novo_associado():
         caminho().adicionar_novos_associados(novos_associados[i])
 
 def test_nova_mensalidade():
-    novas_mensalidades = [['001','12/09/2020','200','21/09/2020'],
-    ['002','25/03/2020','350','01/04/2020'],
-    ['003','05/05/2020','1000','15/05/2020']]
 
-    for i in range(len(novas_mensalidades)):
-        caminho().adicionar_novas_mensalidades(novas_mensalidades[i])
+    mensalidades_jan_a_abr = [[['001','05/01/2020','150',''],['002','15/01/2020','100','12/01/2020'],['003','18/01/2020','400','21/01/2020']],
+    [['001','05/02/2020','180',''],['002','15/02/2020','100','11/02/2020'],['003','18/02/2020','420','17/02/2020']],
+    [['001','05/03/2020','245',''],['002','15/03/2020','100','02/03/2020'],['003','18/03/2020','400','16/03/2020']],
+    [['001','05/04/2020','360',''],['002','15/04/2020','80','12/04/2020'],['003','18/04/2020','390','16/04/2020']]]
+
+    for i in range(len(mensalidades_jan_a_abr)):
+        for j in range(len(mensalidades_jan_a_abr[0])):
+            caminho().adicionar_novas_mensalidades(mensalidades_jan_a_abr[i][j])
 
 def test_excluir_associado():
     caminho().excluir_associado('001')
@@ -25,4 +28,6 @@ def test_excluir_associado():
 def test_alterar_informacoes_associado():
     caminho().alterar_informacoes_associado('002','3','Avenida Brigadeiro Faria Lima')
 
+test_novo_associado()
+test_nova_mensalidade()
 
