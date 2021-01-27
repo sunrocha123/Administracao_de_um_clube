@@ -1,8 +1,9 @@
-# Tornar os comandos do arquivo coleta_de_dados.py mais robustos, pois caso o usuário erre alguma informação ou a máquina não localize no sistema, não devolver um bug para o mesmo.
-
-# Para as ações de alterar, excluir e adicionar nova mensalidade, será necessário criar comandos que valide se o associado já está cadastrado, para realizar os procedimentos necessários. Caso não esteja, notificar o usuário da não localização.
+# Atualizar o programa para gerar o nº do sócio e não pedí-lo ao usuário, evitando assim, duplicidade de informação.
+  # Ao invés de pedir o nº do sócio, solicitar o nº do CPF (sem ponto e traço).
+# Com a inclusão dessa informação, teremos dois meios de pesquisa no banco de dados para alterar e excluir informações.
 
 English
 
-# Make the commands in the file coleta_de_dados.py more robust, because if the user misses some information or the machine does not find in the system, do not return a bug for it.
-# For the actions of changing, deleting and adding a new monthly fee, it will be necessary to create commands that validate that the member is already registered, to carry out the necessary procedures. If not, notify the user of the non-location.
+# Update the program to generate the member number and not ask the user, thus avoiding duplication of information.
+  # Instead of asking for the partner's number, ask for the CPF number (without dot and dash).
+# With the inclusion of this information, we will have two means of searching the database to change and delete information.
