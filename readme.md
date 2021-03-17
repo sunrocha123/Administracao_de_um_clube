@@ -1,9 +1,9 @@
-# Programa de Administração de um clube
+#Programa de Administração de um clube
 
-# Gerenciar dados de associados de um clube
+#Gerenciar dados de associados de um clube
 
 
-# Ordem das informações dos associados
+#Ordem das informações dos associados
 
     #1. Nº sócio
     #2. Nome
@@ -14,7 +14,7 @@
     #7. Nº dependentes
     #8. Data de associação
 
-# Ordem das informações das mensalidades
+#Ordem das informações das mensalidades
 
         # 1. Nº sócio
         # 2. Data vencimento
