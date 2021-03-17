@@ -1,7 +1,7 @@
-* Criar um banco de dados para armazenar as informações.
-* Realizar melhoras na performance do programa.
+* Realizar modificações necessárias para conexão e uso do DB
+* Criar TDDs
 
 English
 
-* Create a database to store the information.
-* Make program performance improvements.
+* Make necessary modifications to connect and use the DB
+* Create TDDs
