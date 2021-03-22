@@ -1,7 +1,9 @@
-* Realizar modificações necessárias para conexão e uso do DB
+* Criar comandos para inclusão, alteração e exclusão de mensalidade
+* Terminar os comandos de inclusão, alteração e exclusão de usuários
 * Criar TDDs
 
 English
 
-* Make necessary modifications to connect and use the DB
+* Create commands for inclusion, alteration and exclusion of monthly fees
+* Finish the commands of inclusion, alteration and exclusion of users
 * Create TDDs
