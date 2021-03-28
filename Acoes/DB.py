@@ -5,7 +5,7 @@ def conectar():
     try:
         conexao = pyodbc.connect("Driver={SQL Server};"
                               "Server=NVT-847\SQLEXPRESS;"
-                              "Database=ADM_CLUB;"
+                              "Database=ADM_Club;"
                               "UID=sa;"
                               "PWD=sa;")
 
@@ -14,6 +14,6 @@ def conectar():
         return conector
 
     except Exception as error:
-        print(f'{datetime.now().strftime("%H:%M:%S")}: Falha na conexão com o DB!\n')
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Falha na conexão com o banco de dados!\n')
         return 0
         

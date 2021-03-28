@@ -5,7 +5,4 @@ class Mensalidades(object):
 
     def alterar_mensalidade(self):
         pass
-
-    def excluir_mensalidade(self):
-        pass
     
