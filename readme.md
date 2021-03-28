@@ -2,6 +2,7 @@
 
 #Gerenciar dados de associados de um clube
 
+<img src="Administracao_de_um_clube/DB/Estrutura do database.png"/>
 
 #Ordem das informações dos associados
 
