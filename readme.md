@@ -68,3 +68,11 @@
                     #- Nova informação (obrigatório)
 
 #Banco de dados - Se conectar com o banco de dados do clube que está no SQL Server da Microsoft, para realizar as ações solicitadas pelo usuário.
+
+#Ações associado - Realizar cadastrado, atualização e exclusão de usuários no banco de dados
+
+    #Cadastrado de usuários - Antes da inclusão, é realizada duas validações no banco de dados.
+
+        #1. Validar se o nº do documento informado pelo usuário já está cadastrado no banco de dados. Caso esteja, não seguiremos com a inclusão. Será exibido para o usuário uma notificação sobre. Caso contrário, seguiremos com o processo de inclusão.
+
+        #2. Validar se os campos tipo de documento, estado, cidade e tipo de endereço informados pelo usuário já estão cadastrados no banco de dados. Caso estejam, serão coletados os ID´s para inserção de outros dados que necessitam destas informações, evitando assim duplicidade de dados. Caso contrário, será feita a inclusão destes dados e posteriormente terão seus ID´s coletados para uso em outras inserção, caso necessário.
