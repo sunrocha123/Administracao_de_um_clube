@@ -87,7 +87,7 @@ class Associados(object):
                         f'\nNão foi possível cadastrar o usuário. Estamos verificando o tema para solução do incidente!')
             else:
                 print(f'O usuário de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
-                    f'Por gentileza, rever as informações coletadas...')     
+                    f'Por gentileza, rever as informações coletadas...\n')     
 
         pass
 
@@ -134,24 +134,37 @@ class Associados(object):
         pass
 
     def alterar_associado(self):
-        # Necessário validar se o nº do documento do usuário está cadastrado no DB
-        print('Áreas de alteração\n1. Dados pessoais\n2. Endereço\n\n')
-        while True:
-            try:
-                opcao = int(input('Digite a opção desejada (1-2): '))
-                if opcao == 1:
-                    print('Campos Dados Pessoais\n')
-                    camposDadosPessoais = ['nome', 'sobrenome', 'tipo_documento', 'numero_documento', 'dtEmissao', 'validade', 'n_dependentes']
-                    for i in range(len(camposDadosPessoais)):
-                        print((i + 1) + ". " + camposDadosPessoais[i])
-                    break
-                elif opcao == 2:
-                    # Alteração de campos do endereço
-                    break
-                else:
-                    print("Opção inválida! Digite novamente.....")    
-            except ValueError:
-                print('Opção inválida! Digite novamente.....')         
+        print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
+        f'Conectando ao Database...')
+
+        conn_DB = self.conectar_DB()
+
+        if conn_DB == 0:
+            print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
+            f'Por gentileza, tente mais tarde...')
+        else:
+            # Necessário validar se o nº do documento do usuário está cadastrado no DB
+            print('Antes de seguirmos com a atualização, precisamos realizar uma validação...')
+            n_documento = input('Digite o número do documento do associado: ').lower().strip()
+            
+
+            print('Áreas de alteração\n1. Dados pessoais\n2. Endereço\n\n')
+            while True:
+                try:
+                    opcao = int(input('Digite a opção desejada (1-2): '))
+                    if opcao == 1:
+                        print('Campos Dados Pessoais\n')
+                        camposDadosPessoais = ['nome', 'sobrenome', 'tipo_documento', 'numero_documento', 'dtEmissao', 'validade', 'n_dependentes']
+                        for i in range(len(camposDadosPessoais)):
+                            print((i + 1) + ". " + camposDadosPessoais[i])
+                        break
+                    elif opcao == 2:
+                        # Alteração de campos do endereço
+                        break
+                    else:
+                        print("Opção inválida! Digite novamente.....")    
+                except ValueError:
+                    print('Opção inválida! Digite novamente.....')         
         pass
 
     def excluir_associado(self):
