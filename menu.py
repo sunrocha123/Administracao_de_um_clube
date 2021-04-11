@@ -1,4 +1,4 @@
-from Acoes import Acoes_associado, Acoes_mensalidade
+from Associado import Cadastro, Atualizacao
 
 class Menu(object):
 
@@ -26,16 +26,16 @@ class Menu(object):
             f'2. Alterar dados de usuário\n'
             f'3. Deletar usuário\n')
 
-        caminho = Acoes_associado.Associados()
-
         while True:
             try:
                 opcao = int(input("Digite a opção desejada (1-3): "))
                 if opcao == 1:
-                    caminho.cadastrar_novo_associado()
+                    caminho = Cadastro.Cadastro()
+                    caminho.coletar_dados()
                     break
                 elif opcao == 2:
-                    caminho.alterar_associado()
+                    caminho = Atualizacao.Atualizacao()
+                    caminho.validar_cadastro()
                     break
                 elif opcao == 3:
                     caminho.excluir_associado()
