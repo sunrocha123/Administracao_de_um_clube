@@ -79,5 +79,5 @@
 
     #Atualização cadastral de associado - Antes da atualização, é realizada uma validação no banco de dados.
 
-        #1. Validar se o nº do documento informado pelo usuário já está cadastrado no banco de dados. Caso esteja, seguiremos com a solicitação de atualização cadastral. Caso contrário, não seguiremos com o processo. Será exibido para o usuário uma notificação sobre.
+        #1. Validar se o nº do documento informado pelo usuário já está cadastrado no banco de dados. Caso esteja, coletaremos o ID do cliente, tendo em vista que é uma informação essencial para realizar as atualizações solicitadas. Caso contrário, não seguiremos com o processo. Será exibido para o usuário uma notificação sobre.
 

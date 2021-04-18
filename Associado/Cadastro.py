@@ -21,7 +21,7 @@ class Cadastro(object):
             nome = input("Digite o nome (obrigatório): ").lower().strip()
             sobrenome = input("Digite o sobrenome (não obrigatório): ").lower().strip()
             tipo_documento = input("Digite o tipo de documento (obrigatório): ").lower().strip()
-            numero_documento = input('Digite o número do documento (obrigatório): ').lower().strip()
+            numero_documento = input('Digite o número do documento (obrigatório): ').strip()
             dtEmissao = input('Digite a data de emissão do documento **Formato: aaaa - mm - dd** (não obrigatório): ').strip()
             validade = input('Digite a data de validade do documento **Formato: aaaa - mm - dd** (não obrigatório): ').strip()
             
