@@ -32,15 +32,9 @@ class Cadastro(object):
 
 
             print('\nEndereço\n')
-            tipo_endereco = input("Digite o tipo de endereço (obrigatório): ").lower().strip()
-            tipo_logradouro = input("Digite o tipo de logradouro (obrigatório): ").lower().strip()
-            nome_logradouro = input("Digite o nome do logradouro (obrigatório): ").lower().strip()
             complemento = input("Digite o complemento (não obrigatório): ").lower().strip()
             numero = input('Digite o número (não obrigatório): ').strip()
-            bairro = input('Digite o bairro (obrigatório): ').lower().strip()
             cep = input('Digite o CEP (não obrigatório): ').strip()
-            cidade = input('Digite a cidade (obrigatório): ').lower().strip()
-            estado = input('Digite o estado (obrigatório): ').lower().strip()
 
             if self.validar_cadastro(conn_DB, numero_documento) == 0:
                 print(f'O usuário de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
@@ -49,7 +43,7 @@ class Cadastro(object):
                 try:
                     cliente = self.cadastrar_cliente(nome, sobrenome, n_dependentes, conn_DB) # cadastra o usuário e coleta o ID gerado para o mesmo
                     documento = self.cadastrar_documento(conn_DB, cliente, numero_documento, dtEmissao, validade, tipo_documento)
-                    endereco = self.cadastrar_endereco(conn_DB, cliente, tipo_endereco, tipo_logradouro, nome_logradouro, complemento, numero, bairro, cep, cidade, estado)
+                    endereco = self.cadastrar_endereco(conn_DB, cliente, complemento, numero)
                     conn_DB.commit()
                     print()
                     print(f"{datetime.now().strftime('%H:%M:%S')}: Usuário cadastrado com sucesso!\n")
@@ -100,41 +94,8 @@ class Cadastro(object):
         conn_DB.execute("INSERT INTO DOCUMENTO VALUES (?,?,?,?,?)",
                         IDcliente, IDtipoDocumento, numero_documento, dtEmissao, validade)
 
-    def cadastrar_endereco(self, conn_DB, IDcliente, tipo_endereco, tipo_logradouro, nome_logradouro, complemento, numero, bairro, cep, cidade, estado):
+    def cadastrar_endereco(self, conn_DB, IDcliente, complemento, numero, cep):
         '''Trecho para cadastrado de endereço no banco de dados'''
-
-        #Validando se o estado informado já consta no BD para coleta do ID
-        conn_DB.execute(f"SELECT ID FROM ESTADO WHERE NOME = '{estado}'")
-        IDestado = conn_DB.fetchval()
-
-        if IDestado == None:
-            conn_DB.execute(f"INSERT INTO ESTADO (NOME) VALUES ('{estado}')")
-
-            #Coletando o ID do estado cadastrado
-            conn_DB.execute(f"SELECT ID FROM ESTADO WHERE NOME = '{estado}'")
-            IDestado = conn_DB.fetchval()
-
-        #Validando se a cidade informado já consta no BD para coleta do ID
-        conn_DB.execute(f"SELECT ID FROM CIDADE WHERE NOME = '{cidade}'")
-        IDcidade = conn_DB.fetchval()
-
-        if IDcidade == None:
-            conn_DB.execute(f"INSERT INTO CIDADE VALUES (?, ?)", IDestado, cidade)
-
-            #Coletando o ID da cidade cadastrado
-            conn_DB.execute(f"SELECT ID FROM CIDADE WHERE NOME = '{cidade}'")
-            IDcidade = conn_DB.fetchval()
-
-        #Validando se o tipo de endereço informado já consta no BD para coleta do ID
-        conn_DB.execute(f"SELECT ID FROM TIPO_ENDERECO WHERE NOME = '{tipo_endereco}'") 
-        IDtipoendereco = conn_DB.fetchval()
-
-        if IDtipoendereco == None:
-            conn_DB.execute(f"INSERT INTO TIPO_ENDERECO (NOME) VALUES ('{tipo_endereco}')")
-
-            #Coletando o ID do tipo de endereço cadastrado
-            conn_DB.execute(f"SELECT ID FROM TIPO_ENDERECO WHERE NOME = '{tipo_endereco}'") 
-            IDtipoendereco = conn_DB.fetchval()
 
         conn_DB.execute("INSERT INTO ENDERECO VALUES (?,?,?,?,?,?,?,?,?)",
                         IDcliente, IDtipoendereco, IDcidade,
