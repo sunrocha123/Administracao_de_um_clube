@@ -46,7 +46,7 @@ class Menu(object):
                 print('Opção inválida! Digite novamente...')
                 
 
-    def escolher_opcao_mensalidade(self):
+    '''def escolher_opcao_mensalidade(self):
         print(f'\n1. Adicionar nova mensalidade\n'
             f'2. Alterar dados de uma mensalidade\n')
 
@@ -64,7 +64,7 @@ class Menu(object):
                 else:
                     print("Opção inválida! Digite novamente.....")    
             except ValueError:
-                print('Opção inválida! Digite novamente.....')   
+                print('Opção inválida! Digite novamente.....')  '''
 
 if __name__ == "__main__":
     print('Olá, bem-vindo ao nosso ADM do Club!\n')
