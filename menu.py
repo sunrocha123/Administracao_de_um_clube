@@ -1,4 +1,4 @@
-from Associado import Cadastro, Atualizacao
+from Associado import Cadastro
 
 class Menu(object):
 
