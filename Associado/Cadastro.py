@@ -30,10 +30,18 @@ class Cadastro(object):
             print('\nTipo de documento:\n1. RG\n2. CPF\n3. Carteira de trabalho\n4. Título de eleitor\n5. CNH\n')
             while True:
                 try:
-                    tipo_documento = int(input("Digite o tipo de documento (1-4) *: "))
-                    if tipo_documento < 1 and tipo_documento > 4:
+                    opcao_tipo_documento = int(input("Digite o tipo de documento (1-4) *: "))
+                    if opcao_tipo_documento < 1 and opcao_tipo_documento > 4:
                         print('Opção inválida! Digite novamente...')
                     else:
+                        if opcao_tipo_documento == 1:
+                            tipo_documento = 'RG'
+                        elif opcao_tipo_documento == 2:
+                            tipo_documento = 'CPF'
+                        elif opcao_tipo_documento == 3:
+                            tipo_documento == 'Carteira de trabalho'
+                        else:
+                            tipo_documento = 'Titulo de eleitor'
                         break
                 except ValueError:
                     print('Opção inválida! Digite novamente...')
@@ -41,6 +49,25 @@ class Cadastro(object):
             numero_documento = input('Digite o número do documento *: ').strip()
             dtEmissao = input('Digite a data de emissão do documento: ').strip()
             validade = input('Digite a data de validade do documento: ').strip()
+
+            print('\nTipo de telefone:\n1. Particular\n2. Corporativo\n')
+
+            while True:
+                try:
+                    opcao_tipo_telefone = int(input("Digite o tipo de telefone (1-2) *: "))
+                    if opcao_tipo_telefone != 1 and opcao_tipo_telefone != 2:
+                        print('Opção inválida! Digite novamente...')
+                    else:
+                        if opcao_tipo_telefone == 1:
+                            tipo_telefone = 'Particular'
+                        else:
+                            tipo_telefone = 'Corporativo'
+                        break
+                except ValueError:
+                    print('Opção inválida! Digite novamente...')
+
+            DDDtelefone = input('Digite o DDD *: ')
+            n_telefone = input('Digite o número *: ')          
             
             try:
                 n_dependentes = int(input("Digite o número de dependentes: "))
@@ -48,29 +75,70 @@ class Cadastro(object):
                 n_dependentes = 0
 
             '''Tendo o CEP, será coletado o endereço completo via API'''
-            cep = input('Digite o CEP *: ').strip()
-            response = requests.get(f'https://ws.apicep.com/cep/{cep}.json')
-            dados = response.json()
-            print(dados)
-            complemento = input("Digite o complemento: ").lower().strip()
-            numero = input('Digite o número: ').strip()
-            
-
-            if self.validar_cadastro(conn_DB, numero_documento) == 0:
-                print(f'O usuário de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
-                    f'Por gentileza, rever as informações coletadas...\n')
+            endereco = self.coletar_endereco()
+            if endereco == 0:
+                print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
+                f'Por gentileza, tente mais tarde...')
             else:
-                try:
-                    cliente = self.cadastrar_cliente(nome, sobrenome, n_dependentes, conn_DB) # cadastra o usuário e coleta o ID gerado para o mesmo
-                    documento = self.cadastrar_documento(conn_DB, cliente, numero_documento, dtEmissao, validade, tipo_documento)
-                    endereco = self.cadastrar_endereco(conn_DB, cliente, complemento, numero)
-                    conn_DB.commit()
-                    print()
-                    print(f"{datetime.now().strftime('%H:%M:%S')}: Usuário cadastrado com sucesso!\n")
-                except Exception as error:
-                    print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                            f'\nNão foi possível cadastrar o usuário. Estamos verificando o tema para solução do incidente!\n')  
+                print(f'\nEndereço localizado:\n'
+                        f'Logradouro: {endereco["address"]}\n'
+                        f'Cidade: {endereco["city"]}\n'
+                        f'Estado: {endereco["state"]}\n'
+                        f'Bairro: {endereco["district"]}\n'
+                        f'CEP: {endereco["code"]}\n')
+                numero = input('Digite o número: ').strip()
+                complemento = input("Digite o complemento: ").lower().strip()
+                print('\nTipo endereço:\n1. Residencial\n2. Corporativo\n')
 
+                while True:
+                    try:
+                        opcao_tipo_endereco = int(input("Digite o tipo de endereço (1-2) *: "))
+                        if opcao_tipo_endereco != 1 and opcao_tipo_endereco != 2:
+                            print('Opção inválida! Digite novamente...')
+                        else:
+                            if opcao_tipo_endereco == 1:
+                                tipo_endereco = 'Residencial'
+                            else:
+                                tipo_endereco = 'Corporativo'
+                            break
+                    except ValueError:
+                        print('Opção inválida! Digite novamente...')
+            
+                if self.validar_cadastro(conn_DB, numero_documento) == 0:
+                    print(f'O usuário de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
+                        f'Por gentileza, rever as informações coletadas...\n')
+                else:
+                    try:
+                        usuario = self.cadastrar_usuario(nome, sobrenome, n_dependentes, conn_DB) # cadastra o usuário e coleta o ID gerado para o mesmo
+                        telefone = self.cadastrar_telefone(tipo_telefone, usuario, DDDtelefone, n_telefone, conn_DB)
+                        documento = self.cadastrar_documento(conn_DB, usuario, numero_documento, dtEmissao, validade, tipo_documento)
+                        endereco = self.cadastrar_endereco(conn_DB, usuario, tipo_endereco, endereco, complemento, numero)
+                        conn_DB.commit()
+                        print()
+                        print(f"{datetime.now().strftime('%H:%M:%S')}: Usuário cadastrado com sucesso!\n")
+                    except Exception as error:
+                        print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
+                                f'\nNão foi possível cadastrar o usuário. Estamos verificando o tema para solução do incidente!\n')  
+
+    def coletar_endereco(self):
+        try:           
+            cep = input('Digite o CEP *: ').strip()
+            print(f"\n{datetime.now().strftime('%H:%M:%S')}: "
+                f"Conectando a API....") 
+            response = requests.get(f'https://ws.apicep.com/cep/{cep}.json')
+            print(f"{datetime.now().strftime('%H:%M:%S')}: "
+                f"Conexão realizada com sucesso!")
+            return response.json()
+        except requests.exceptions.HTTPError as errh:
+            print(errh)
+        except requests.exceptions.ConnectionError as errc:
+            print(errc)
+        except requests.exceptions.Timeout as errt:
+            print(errt)
+        except requests.exceptions.RequestException as err:
+            print(err)
+
+        return 0
 
     def validar_cadastro(self, conn_DB, numero_documento):
 
@@ -85,39 +153,52 @@ class Cadastro(object):
             return 1
         else:
             return 0            
-        pass
 
-    def cadastrar_cliente(self, nome, sobrenome, n_dependentes, conn_DB):
-        conn_DB.execute("INSERT INTO CLIENTE VALUES (?,?,?,GETDATE())",
+    def cadastrar_usuario(self, nome, sobrenome, n_dependentes, conn_DB):
+
+        #Cadastrando usuário no banco de dados
+        conn_DB.execute("INSERT INTO USUARIO VALUES (?,?,?,GETDATE())",
                         nome, sobrenome, n_dependentes)
 
         #Coletando o ID do usuário cadastrado
-        conn_DB.execute("SELECT MAX(ID) FROM CLIENTE")
-        IDcliente = conn_DB.fetchval()
+        conn_DB.execute("SELECT MAX(ID) FROM USUARIO")
+        IDusuario = conn_DB.fetchval()
 
-        return IDcliente           
+        return IDusuario
 
-    def cadastrar_documento(self, conn_DB, IDcliente, numero_documento, dtEmissao, validade, tipo_documento):
-        '''Trecho para cadastrado de documento no banco de dados'''
+    def cadastrar_telefone(self, tipo_telefone, IDusuario, DDD, n_telefone, conn_DB):
+        #Coletando o ID do tipo de telefone
+        conn_DB.execute(f"SELECT ID FROM TIPO_TELEFONE WHERE NOME = '{tipo_telefone}'")
+        Idtipo_telefone = conn_DB.fetchval()
 
-        #Validando se o documento informado já consta no BD para coleta do ID
+        #Cadastrando telefone no banco de dados
+        conn_DB.execute("INSERT INTO VALUES (?,?,?,?)",
+                        IDusuario, Idtipo_telefone, DDD, n_telefone)
+        pass          
+
+    def cadastrar_documento(self, conn_DB, IDusuario, numero_documento, dtEmissao, validade, tipo_documento):
+
+        #Coletando o ID do tipo do documento
         conn_DB.execute(f"SELECT ID FROM TIPO_DOCUMENTO WHERE NOME = '{tipo_documento}'")
-        IDtipoDocumento = conn_DB.fetchval()
+        IDtipo_documento = conn_DB.fetchval()
 
-        if IDtipoDocumento == None:
-            conn_DB.execute(f"INSERT INTO TIPO_DOCUMENTO (NOME) VALUES ('{tipo_documento}')")
-
-            #Coletando o ID do tipo do documento cadastrado
-            conn_DB.execute(f"SELECT ID FROM TIPO_DOCUMENTO WHERE NOME = '{tipo_documento}'")
-            IDtipoDocumento = conn_DB.fetchval()
-                        
+        #Cadastrando documento no banco de dados            
         conn_DB.execute("INSERT INTO DOCUMENTO VALUES (?,?,?,?,?)",
-                        IDcliente, IDtipoDocumento, numero_documento, dtEmissao, validade)
+                        IDusuario, IDtipo_documento, numero_documento, dtEmissao, validade)
 
-    def cadastrar_endereco(self, conn_DB, IDcliente, complemento, numero, cep):
-        '''Trecho para cadastrado de endereço no banco de dados'''
+    def cadastrar_endereco(self, conn_DB, IDusuario, tipo_endereco, endereco, complemento, numero):
+        #Coletando o ID do tipo de endereço
+        conn_DB.execute(f"SELECT ID FROM TIPO_ENDERECO WHERE NOME = '{tipo_endereco}'")
+        IDtipo_endereco = conn_DB.fetchval()
 
-        conn_DB.execute("INSERT INTO ENDERECO VALUES (?,?,?,?,?,?,?,?,?)",
-                        IDcliente, IDtipoendereco, IDcidade,
-                        tipo_logradouro, nome_logradouro, complemento,
-                        numero, bairro, cep)
+        #Validando se o CEP informado já encontrasse no banco de dados
+        conn_DB.execute(f"SELECT ID FROM CEP WHERE NUMERO = '{endereco['code']}'")
+        IDcep = conn_DB.fetchval()
+
+        if IDcep == None:
+            #Aguardando código de cadastro de endereço no banco
+            pass
+
+        conn_DB.execute("INSERT INTO ENDERECO VALUES (?,?,?,?,?)",
+                        IDusuario, IDtipo_endereco, IDcep,
+                        numero, complemento)
