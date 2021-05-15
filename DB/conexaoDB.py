@@ -4,13 +4,13 @@ import pyodbc
 def conectar():
     try:
         conexao = pyodbc.connect("Driver={SQL Server};"
-                              "Server=NVT-847\SQLEXPRESS;"
+                              "Server=localhost\SQLEXPRESS;"
                               "Database=ADM_Club;"
                               "UID=sa;"
                               "PWD=sa;")
 
         conector = conexao.cursor()
-        print(f'{datetime.now().strftime("%H:%M:%S")}: Conexão realizada com sucesso!')
+        print(f'{datetime.now().strftime("%H:%M:%S")}: Conexão realizada com sucesso!\n')
         return conector
 
     except Exception as error:
