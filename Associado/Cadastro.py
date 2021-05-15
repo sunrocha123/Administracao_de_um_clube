@@ -1,4 +1,5 @@
 import pyodbc
+import requests
 from datetime import date, datetime
 from DB import conexaoDB
 
@@ -16,25 +17,44 @@ class Cadastro(object):
         if conn_DB == 0:
             print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
             f'Por gentileza, tente mais tarde...')
-        else:        
-            print('\nDados pessoais\n')
-            nome = input("Digite o nome (obrigatório): ").lower().strip()
-            sobrenome = input("Digite o sobrenome (não obrigatório): ").lower().strip()
-            tipo_documento = input("Digite o tipo de documento (obrigatório): ").lower().strip()
-            numero_documento = input('Digite o número do documento (obrigatório): ').strip()
-            dtEmissao = input('Digite a data de emissão do documento **Formato: aaaa - mm - dd** (não obrigatório): ').strip()
-            validade = input('Digite a data de validade do documento **Formato: aaaa - mm - dd** (não obrigatório): ').strip()
+        else:
+            print(f'Por gentileza, informe os dados abaixo para cadastro do usuário\n\nPontos de atenção:\n'
+                    f'1. Todo campo que tiver um * no final, é obrigatório o preenchimento!\n'
+                    f'2. Para número de documento, digitar sem espaço e traço\n'
+                    f'3. Para campos que solicitam data, digitar no formato AAAA-MM-DD\n'
+                    f'4. Para o campo de CEP, digitar no formato 00000-000\n')
+
+            nome = input("Digite o nome *: ").lower().strip()
+            sobrenome = input("Digite o sobrenome: ").lower().strip()
+
+            print('\nTipo de documento:\n1. RG\n2. CPF\n3. Carteira de trabalho\n4. Título de eleitor\n5. CNH\n')
+            while True:
+                try:
+                    tipo_documento = int(input("Digite o tipo de documento (1-4) *: "))
+                    if tipo_documento < 1 and tipo_documento > 4:
+                        print('Opção inválida! Digite novamente...')
+                    else:
+                        break
+                except ValueError:
+                    print('Opção inválida! Digite novamente...')
+
+            numero_documento = input('Digite o número do documento *: ').strip()
+            dtEmissao = input('Digite a data de emissão do documento: ').strip()
+            validade = input('Digite a data de validade do documento: ').strip()
             
             try:
-                n_dependentes = int(input("Digite o número de dependentes (não obrigatório): "))
+                n_dependentes = int(input("Digite o número de dependentes: "))
             except ValueError:
                 n_dependentes = 0
 
-
-            print('\nEndereço\n')
-            complemento = input("Digite o complemento (não obrigatório): ").lower().strip()
-            numero = input('Digite o número (não obrigatório): ').strip()
-            cep = input('Digite o CEP (não obrigatório): ').strip()
+            '''Tendo o CEP, será coletado o endereço completo via API'''
+            cep = input('Digite o CEP *: ').strip()
+            response = requests.get(f'https://ws.apicep.com/cep/{cep}.json')
+            dados = response.json()
+            print(dados)
+            complemento = input("Digite o complemento: ").lower().strip()
+            numero = input('Digite o número: ').strip()
+            
 
             if self.validar_cadastro(conn_DB, numero_documento) == 0:
                 print(f'O usuário de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
