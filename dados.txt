@@ -1,0 +1,18 @@
+tipo de telefone
+
+1. particular
+2. corporativo
+
+tipo de documento
+
+1. RG
+2. CPF
+3. Carteira de trabalho
+4. Título de eleitor
+5. CNH
+
+tipo de endereço
+
+residencial
+corporativo
+
