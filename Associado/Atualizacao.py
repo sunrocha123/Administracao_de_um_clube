@@ -9,7 +9,7 @@ class Atualizacao(object):
 
     def validar_cadastro(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-        f'Conectando ao Database...')
+        f'Conectando ao banco de dados...')
 
         conn_DB = self.conectar_DB()
 
@@ -23,30 +23,37 @@ class Atualizacao(object):
 
             '''
 
-            print('\nAntes de seguirmos com a atualização, precisamos realizar uma validação...')
+            print(f'\nAntes de seguirmos com a atualização, precisamos realizar uma validação...\n'
+                f'Digite o campo abaixo sem ponto e traço\n')
             n_documento = input('Digite o número do documento do associado: ').lower().strip()
 
-            conn_DB.execute(f"SELECT ID_CLIENTE FROM DOCUMENTO WHERE NUMERO = '{n_documento}'")
-            idCliente = conn_DB.fetchval()       
+            conn_DB.execute(f"SELECT ID_USUARIO FROM DOCUMENTO WHERE NUMERO = '{n_documento}'")
+            IDusuario = conn_DB.fetchval()       
 
-            if idCliente == None:
+            if IDusuario == None:
                 print(f'Usuário não localizado no banco de dados...\n'
-                    f'Por gentileza, verificar!')
+                    f'Por gentileza, verificar...')
             
             else:
-                self.coletar_dados(conn_DB, idCliente)
+                self.escolher_setor_de_atualizacao(conn_DB, IDusuario)
         pass
 
-    def coletar_dados(self, conn_DB, idCliente):
-        print('\nÁreas de alteração\n\n1. Dados pessoais\n2. Endereço\n')
+    def escolher_setor_de_atualizacao(self, conn_DB, IDusuario):
+        print('\nÁreas de alteração\n\n1. Usuário\n2. Documento\n3. Telefone\n4. Endereço\n')
         while True:
             try:
-                opcao = int(input('Digite a opção desejada (1-2): '))
+                opcao = int(input('Digite a opção desejada (1-4): '))
                 if opcao == 1:
-                    self.escolherCampo_deAtualizacao_DadosPessoais(conn_DB, idCliente)
+                    self.atualizar_usuario(conn_DB, IDusuario)
                     break
                 elif opcao == 2:
-                    self.escolherCampo_deAtualizacao_Endereco(conn_DB, idCliente)
+                    self.atualizar_documento(conn_DB, IDusuario)
+                    break
+                elif opcao == 3:
+                    self.atualizar_telefone(conn_DB, IDusuario)
+                    break
+                elif opcao == 4:
+                    self.atualizar_endereco(conn_DB, IDusuario)
                     break
                 else:
                     print("Opção inválida! Digite novamente....")    
@@ -54,62 +61,32 @@ class Atualizacao(object):
                 print('Opção inválida! Digite novamente....')                
         pass
 
-    def escolherCampo_deAtualizacao_DadosPessoais(self, conn_DB, idCliente):
-        print('Campos Dados Pessoais\n')
-        camposDadosPessoais = ['nome', 'sobrenome', 'n_dependentes', 'tipo_documento', 'numero', 'dtemissao', 'validade']
-        for i in range(len(camposDadosPessoais)):
-            print(str(i + 1) + ". " + camposDadosPessoais[i])
-        print()
+    def atualizar_usuario(self, conn_DB, IDusuario):
+        print('\n1. Nome\n2. Sobrenome\n3. Número de dependentes\n')
         while True:
             try:
-                opcao = int(input('Digite a opção desejada (1-7): '))
-                if opcao >= 1 and opcao <= 7:
-                    if opcao >= 1 and opcao <= 3:
-                        self.atualizarCliente(conn_DB, idCliente, camposDadosPessoais[opcao - 1])
-                    else:
-                        self.atualizarDocumento(conn_DB, idCliente, camposDadosPessoais[opcao - 1])
-                    break
+                opcao = int(input('Digite a opção desejada (1-3): '))
+                if opcao == 3:
+                    while True:
+                        try:
+                            novaInformacao = int(input('Digite a nova informação: '))
+                            break
+                        except ValueError:
+                            print('Opção inválida! Digite novamente.....')
+                    conn_DB.execute(f"UPDATE USUARIO SET N_DEPENDENTES = {novaInformacao}")
                 else:
-                    print("Opção inválida! Digite novamente.....")    
-            except ValueError:
-                print('Opção inválida! Digite novamente.....')  
-        pass
-
-    def atualizarCliente(self, conn_DB, idCliente, campoAtualizacao):
-        
-        if campoAtualizacao == 'n_dependentes':
-            novaIinformacao = int(input("Digite a nova informação: "))
-        else:
-            novaIinformacao = input("Digite a nova informação: ").lower().strip()
-
-        try:
-            conn_DB.execute(f"UPDATE CLIENTE SET {campoAtualizacao} = '{novaIinformacao}' WHERE ID = {idCliente}")
-            conn_DB.commit()
-            print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-                f'Informação atualizada com sucesso!')
-        except Exception as error:
-            print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                f'\nNão foi possível realizar a atualização. Estamos verificando o tema para solução do incidente!\n')
-
-        pass
-
-    def atualizarDocumento(self, conn_DB, idCliente, campoAtualizacao):
-        if campoAtualizacao == 'tipo_documento':
-            # Aguardando código
-        else:
-            if campoAtualizacao != 'numero':
-                novaIinformacao = self.ajustarData()
-            else:
-                novaIinformacao = input("Digite nova informação: ").strip()
-
-            try:
-                conn_DB.execute(f"UPDATE DOCUMENTO SET {campoAtualizacao} = '{novaIinformacao}' WHERE ID = {idCliente}")
+                    novaInformacao = input('Digite a nova informação: ').lower().strip()
+                    if opcao == 1:
+                        coluna = 'NOME'
+                    elif opcao == 2:
+                        coluna = 'SOBRENOME'
+                    conn_DB.execute(f"UPDATE USUARIO SET {coluna} = '{novaInformacao}'")
                 conn_DB.commit()
-                print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-                    f'Informação atualizada com sucesso!')
-            except Exception as error:
-                print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                    f'\nNão foi possível realizar a atualização. Estamos verificando o tema para solução do incidente!\n')
+                print(f"{datetime.now().strftime('%H:%M:%S')}: Informação atualizada!\n")
+                break
+            except ValueError:
+                print('Opção inválida! Digite novamente.....')
+    def atualizar_documento(self, conn_DB, idCliente, campoAtualizacao):
         pass
 
     def ajustarData(self):
@@ -127,39 +104,8 @@ class Atualizacao(object):
 
         return dataAjustada
 
-    def escolherCampo_deAtualizacao_Endereco(self, conn_DB, idCliente):
-        print('Campos Endereço\n')
-        camposEndereco = ['tipo_endereco', 'tipo_logradouro', 'nome_logradouro', 'complemento', 'numero', 'bairro', 'cep', 'cidade', 'estado']
-        for i in range(len(camposEndereco)):
-            print(str(i + 1) + ". " + camposEndereco[i])
-        print()
-        while True:
-            try:
-                opcao = int(input('Digite a opção desejada (1-9): '))
-                if opcao >= 1 and opcao <= 9:
-                    if opcao >= 2 and opcao <= 7:
-                        self.atualizarEndereco(conn_DB, idCliente, camposEndereco[opcao - 1])
-                    elif opcao == 1:
-                        # Aguardando código
-                    else:
-                        # Aguardando código
-                    break
-                else:
-                    print("Opção inválida! Digite novamente.....")    
-            except ValueError:
-                print('Opção inválida! Digite novamente.....')  
+    def atualizar_endereco(self, conn_DB, idCliente): 
         pass
 
-    def atualizarEndereco(self, conn_DB, idCliente, campoAtualizacao):
-        novaInformacao = input("Digite a nova informação: ")
-
-        try:
-            conn_DB.execute(f"UPDATE ENDERECO SET {campoAtualizacao} = '{novaIinformacao}' WHERE ID = {idCliente}")
-            conn_DB.commit()
-            print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-                f'Informação atualizada com sucesso!')
-        except Exception as error:
-            print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                f'\nNão foi possível realizar a atualização. Estamos verificando o tema para solução do incidente!\n')
-
+    def atualizar_telefone(self, conn_DB, IDusuario):
         pass

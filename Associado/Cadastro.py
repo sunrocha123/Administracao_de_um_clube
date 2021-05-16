@@ -10,7 +10,7 @@ class Cadastro(object):
 
     def coletar_dados(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-        f'Conectando ao Database...')
+        f'Conectando ao banco de dados...')
 
         conn_DB = self.conectar_DB()
 
@@ -30,8 +30,8 @@ class Cadastro(object):
             print('\nTipo de documento:\n1. RG\n2. CPF\n3. Carteira de trabalho\n4. Título de eleitor\n5. CNH\n')
             while True:
                 try:
-                    opcao_tipo_documento = int(input("Digite o tipo de documento (1-4) *: "))
-                    if opcao_tipo_documento < 1 and opcao_tipo_documento > 4:
+                    opcao_tipo_documento = int(input("Digite o tipo de documento (1-5) *: "))
+                    if opcao_tipo_documento < 1 and opcao_tipo_documento > 5:
                         print('Opção inválida! Digite novamente...')
                     else:
                         if opcao_tipo_documento == 1:
@@ -40,8 +40,10 @@ class Cadastro(object):
                             tipo_documento = 'CPF'
                         elif opcao_tipo_documento == 3:
                             tipo_documento == 'Carteira de trabalho'
-                        else:
+                        elif opcao_tipo_documento == 4:
                             tipo_documento = 'Titulo de eleitor'
+                        else:
+                            tipo_documento = 'CNH'
                         break
                 except ValueError:
                     print('Opção inválida! Digite novamente...')
@@ -118,7 +120,7 @@ class Cadastro(object):
                         print(f"{datetime.now().strftime('%H:%M:%S')}: Usuário cadastrado com sucesso!\n")
                     except Exception as error:
                         print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                                f'\nNão foi possível cadastrar o usuário. Estamos verificando o tema para solução do incidente!\n')  
+                                f'\n\nNão foi possível cadastrar o usuário. Estamos verificando o tema para solução do incidente!\n')  
 
     def coletar_endereco(self):
         try:           
@@ -172,11 +174,16 @@ class Cadastro(object):
         Idtipo_telefone = conn_DB.fetchval()
 
         #Cadastrando telefone no banco de dados
-        conn_DB.execute("INSERT INTO VALUES (?,?,?,?)",
+        conn_DB.execute("INSERT INTO TELEFONE VALUES (?,?,?,?)",
                         IDusuario, Idtipo_telefone, DDD, n_telefone)
         pass          
 
     def cadastrar_documento(self, conn_DB, IDusuario, numero_documento, dtEmissao, validade, tipo_documento):
+
+        if dtEmissao == '':
+            dtEmissao = None
+        elif validade == '':
+            validade = None
 
         #Coletando o ID do tipo do documento
         conn_DB.execute(f"SELECT ID FROM TIPO_DOCUMENTO WHERE NOME = '{tipo_documento}'")
@@ -196,8 +203,80 @@ class Cadastro(object):
         IDcep = conn_DB.fetchval()
 
         if IDcep == None:
-            #Aguardando código de cadastro de endereço no banco
-            pass
+            #Cadastrando novo endereço no banco de dados
+
+            #Validando se UF já encontrasse cadastrada
+            conn_DB.execute(f"SELECT ID FROM UF WHERE SIGLA = '{endereco['state']}'")
+            IDuf = conn_DB.fetchval()
+
+            if IDuf == None:
+                #Cadastrando UF
+                conn_DB.execute("INSERT INTO UF VALUES (?)",
+                                endereco['state'])
+
+                #Coletando o ID da UF cadastrada
+                conn_DB.execute("SELECT MAX(ID) FROM UF")
+                IDuf = conn_DB.fetchval()
+
+            #Validando se cidade já encontrasse cadastrada
+            conn_DB.execute(f"SELECT ID FROM CIDADE WHERE NOME = '{endereco['city']}'")
+            IDcidade = conn_DB.fetchval()
+
+            if IDcidade == None:
+                #Cadastrando Cidade
+                conn_DB.execute("INSERT INTO CIDADE VALUES (?,?)",
+                                IDuf, endereco['city'])
+
+                #Coletando o ID da cidade cadastrada
+                conn_DB.execute("SELECT MAX(ID) FROM CIDADE")
+                IDcidade = conn_DB.fetchval()
+
+            #Validando se bairro já encontrasse cadastrada
+            conn_DB.execute(f"SELECT ID FROM BAIRRO WHERE NOME = '{endereco['district']}'")
+            IDbairro = conn_DB.fetchval()
+
+            if IDbairro == None:
+                #Cadastrando Bairro
+                conn_DB.execute("INSERT INTO BAIRRO VALUES (?,?)",
+                                IDcidade, endereco['district'])
+
+                #Coletando o ID do bairro cadastrado
+                conn_DB.execute("SELECT MAX(ID) FROM BAIRRO")
+                IDbairro = conn_DB.fetchval()
+
+            '''A API não encaminha o tipo e nome de logradouro já separado, desta forma,
+            o loop abaixo fará está separação e guardará dentro de duas variáveis.
+            '''
+            for i in range(len(endereco['address'])):
+                if endereco['address'][i] == " ":
+                    Tipologradouro = endereco['address'][0:i]
+                    Nomelogradouro = endereco['address'][i + 1:]
+                    break
+
+            #Validando se tipo de logradouro já encontrasse cadastrada
+            conn_DB.execute(f"SELECT ID FROM TIPO_LOGRADOURO WHERE NOME = '{Tipologradouro}'")
+            IDtipo_logradouro = conn_DB.fetchval()
+
+            if IDtipo_logradouro == None:
+                #Cadastrando Tipo de logradouro
+                conn_DB.execute("INSERT INTO TIPO_LOGRADOURO VALUES (?,?)",
+                                IDbairro, Tipologradouro)
+
+                #Coletando o ID do tipo de logradouro
+                conn_DB.execute("SELECT MAX(ID) FROM TIPO_LOGRADOURO")
+                IDtipo_logradouro = conn_DB.fetchval()
+
+            #Cadastrando o Nome do logradouro
+            conn_DB.execute("INSERT INTO NOME_LOGRADOURO VALUES (?,?)",
+                            IDtipo_logradouro, Nomelogradouro)
+
+            #Cadastrando o CEP
+            conn_DB.execute("INSERT INTO CEP VALUES (?)",
+                            endereco['code'])
+
+            #Coletando o ID do CEP
+            conn_DB.execute("SELECT MAX(ID) FROM CEP")
+            IDcep = conn_DB.fetchval()
 
         conn_DB.execute("INSERT INTO ENDERECO VALUES (?,?,?,?,?)",
                         IDusuario, IDtipo_endereco, IDcep,
