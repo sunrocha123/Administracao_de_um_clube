@@ -1,13 +1,15 @@
-* Criar comandos para inclusão, alteração e deleção de mensalidade
-* Atualizar comandos de inclusão e manutenção de usuários. Lembrando que para o endereço, se faz necessário coletar apenas o CEP, complemento e número, tendo em vista que as demais informações serão coletadas automaticamente via API. Além disso, validar a possível criação de uma tabela apenas para CEP e outra para número e complemento.
-* Criar comandos de deleção de usuario
+* Criar comandos para cadastro, atualização e exclusão de mensalidade
+* Terminar comandos para atualização de dados de usuários
+* Criar comandos para excluir usuários
 * Atualizar a documentação
+* Atualizar o diagrama do banco de dados
 * Criar TDDs
 
 English
 
-* Create commands for inclusion, alteration and deletion of monthly fees
-* Update user inclusion and maintenance commands. Remembering that for the address, it is necessary to collect only the zip code, complement and number, considering that the other information will be collected automatically via API. In addition, validate the possible creation of a table just for zip code and another for number and add-on.
-* Create user deletion commands
+* Create commands for registering, updating and deleting monthly fees
+* End commands for updating user data
+* Create commands to delete users
 * Update the documentation
+* Update the database diagram
 * Create TDDs
