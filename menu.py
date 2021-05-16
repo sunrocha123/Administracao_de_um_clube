@@ -1,4 +1,5 @@
 from Associado import Cadastro
+from DB import configuracao
 
 class Menu(object):
 
@@ -6,15 +7,19 @@ class Menu(object):
 
         print(f'=================\nMENU\n=================\n'
             f'1. Inventário de associados\n'
-            f'2. Mensalidades\n')
+            f'2. Mensalidades\n'
+            f'3. Configurações\n')
         while True:
             try:
-                opcao = int(input('Digite a opção desejada (1-2): '))
+                opcao = int(input('Digite a opção desejada (1-3): '))
                 if opcao == 1:
                     self.escolher_opcao_inventario_associado()
                     break
                 elif opcao == 2:
                     self.escolher_opcao_mensalidade()
+                    break
+                elif opcao == 3:
+                    configuracao.cadastrar_informacoes()
                     break
                 else:
                     print('Opção inválida! Digite novamente..')                   
