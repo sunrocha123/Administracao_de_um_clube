@@ -1,4 +1,4 @@
-from Associado import Cadastro
+from Associado import Cadastro, Atualizacao
 from DB import configuracao
 
 class Menu(object):
