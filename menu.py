@@ -1,4 +1,5 @@
-from Associado import Cadastro, Atualizacao
+from Associado import Cadastro_associado, Atualizacao_associado, Exclusao_associado
+from Mensalidade import Cadastro_mensalidade
 from DB import configuracao
 
 class Menu(object):
@@ -35,15 +36,16 @@ class Menu(object):
             try:
                 opcao = int(input("Digite a opção desejada (1-3): "))
                 if opcao == 1:
-                    caminho = Cadastro.Cadastro()
+                    caminho = Cadastro_associado.Cadastro()
                     caminho.coletar_dados()
                     break
                 elif opcao == 2:
-                    caminho = Atualizacao.Atualizacao()
+                    caminho = Atualizacao_associado.Atualizacao()
                     caminho.validar_cadastro()
                     break
                 elif opcao == 3:
-                    caminho.excluir_associado()
+                    caminho = Exclusao_associado.Exclusao()
+                    caminho.validar_cadastro()
                     break
                 else:
                     print("Opção inválida! Digite novamente...")
@@ -51,25 +53,24 @@ class Menu(object):
                 print('Opção inválida! Digite novamente...')
                 
 
-    '''def escolher_opcao_mensalidade(self):
+    def escolher_opcao_mensalidade(self):
         print(f'\n1. Adicionar nova mensalidade\n'
             f'2. Alterar dados de uma mensalidade\n')
-
-        caminho = Acoes_mensalidade.Mensalidades()
 
         while True:
             try:
                 opcao = int(input('Digite a opção desejada (1-2): '))
                 if opcao == 1:
-                    caminho.cadastrar_nova_mensalidade()
+                    caminho = Cadastro_mensalidade.Cadastro()
+                    caminho.coletar_dados()
                     break
                 elif opcao == 2:
-                    caminho.alterar_mensalidade()
+                    teste = 'aguardando código'
                     break
                 else:
                     print("Opção inválida! Digite novamente.....")    
             except ValueError:
-                print('Opção inválida! Digite novamente.....')  '''
+                print('Opção inválida! Digite novamente.....')
 
 if __name__ == "__main__":
     print('Olá, bem-vindo ao nosso ADM do Club!\n')
