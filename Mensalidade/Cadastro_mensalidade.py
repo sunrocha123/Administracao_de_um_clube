@@ -1,6 +1,7 @@
 import pyodbc
 from datetime import date, datetime
 from DB import conexaoDB
+from Associado import Atualizacao_associado
 
 class Cadastro(object):
 
@@ -19,15 +20,16 @@ class Cadastro(object):
         else:
             print(f'Pontos de atenção:\n'
                     f'1. Todo campo que tiver um * no final, é obrigatório o preenchimento!\n'
-                    f'2. Para número de documento, digitar sem espaço e traço\n'
-                    f'3. Para campos que solicitam data, digitar no formato AAAA-MM-DD\n')
+                    f'2. Para número de documento, digitar sem espaço e traço\n')
 
             '''
             As mensalidades cadastradas no banco de dados, serão associadas ao número do documento
             do usuário
             '''
 
-            print('Antes de seguirmos com o cadastro, precisamos realizar uma validação...\n')
+            print('=======================')
+            print('VALIDAÇÃO NECESSÁRIA!')
+            print('=======================\n')
 
             nDocumento = input('Digite o número do documento do associado: ').strip()
 
@@ -40,21 +42,28 @@ class Cadastro(object):
                     f'Por gentileza, verificar...\n')
 
             else:
-                dtVencimento = input('Digite a data de vencimento *: ').strip()
-                valor = float(input('Digite o valor *: '))
-                dtPagamento = input('Digite a data de pagamento: ').strip()
+                #caminho para coleta de datas
+                caminho = Atualizacao_associado.Atualizacao()
+                print('\n=========================')
+                print('INFORMAÇÕES PARA CADASTRO')
+                print('=========================\n')
+                valor = float(input('Digite o valor da mensalidade *: '))
+                print('\nData de vencimento *')
+                dtVencimento = caminho.ajustarData()
+                print('\nData de pagamento')
+                dtPagamento = caminho.ajustarData()
 
                 if dtPagamento == '':
                     dtPagamento = None
 
                 self.cadastrar_mensalidade(conn_DB, dtVencimento, valor, dtPagamento, idUsuario)
-                print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
-                f'Mensalidade cadastrada!')
+                print(f'{datetime.now().strftime("%H:%M:%S")}: '
+                f'Mensalidade cadastrada!\n')
 
     def cadastrar_mensalidade(self, conn_DB, dtVencimento, valor, dtPagamento, idUsuario):
 
         #Cadastrando mensalidade
         conn_DB.execute("INSERT INTO MENSALIDADE VALUES (?,?,?,?)",
-                        idUsuario, dtVencimento, valor, dtPagamento)
+                        idUsuario, dtVencimento, dtPagamento, valor)
         conn_DB.commit()
         pass
