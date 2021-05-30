@@ -2,6 +2,7 @@ import pyodbc
 import requests
 from datetime import date, datetime
 from DB import conexaoDB
+from Associado import Atualizacao_associado
 
 class Cadastro(object):
 
@@ -18,11 +19,14 @@ class Cadastro(object):
             print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
             f'Por gentileza, tente mais tarde...')
         else:
-            print(f'Por gentileza, informe os dados abaixo para cadastro do usuário\n\nPontos de atenção:\n'
+            print(f'Pontos de atenção:\n'
                     f'1. Todo campo que tiver um * no final, é obrigatório o preenchimento!\n'
-                    f'2. Para número de documento, digitar sem espaço e traço\n'
-                    f'3. Para campos que solicitam data, digitar no formato AAAA-MM-DD\n'
-                    f'4. Para o campo de CEP, digitar no formato 00000-000\n')
+                    f'2. Para número de documento ou telefone, digitar sem espaço e traço\n'
+                    f'3. Para o campo de CEP, digitar no formato 00000-000\n')
+
+            print('\n=========================')
+            print('INFORMAÇÕES PARA CADASTRO')
+            print('=========================\n')
 
             nome = input("Digite o nome *: ").lower().strip()
             sobrenome = input("Digite o sobrenome: ").lower().strip()
@@ -48,9 +52,14 @@ class Cadastro(object):
                 except ValueError:
                     print('Opção inválida! Digite novamente...')
 
+            #caminho para coleta de datas
+            caminho = Atualizacao_associado.Atualizacao()
             numero_documento = input('Digite o número do documento *: ').strip()
-            dtEmissao = input('Digite a data de emissão do documento: ').strip()
-            validade = input('Digite a data de validade do documento: ').strip()
+
+            print('\nData de emissão')
+            dtEmissao = caminho.ajustarData()
+            print('\nValidade')
+            validade = caminho.ajustarData()
 
             print('\nTipo de telefone:\n1. Particular\n2. Corporativo\n')
 
@@ -116,7 +125,6 @@ class Cadastro(object):
                         documento = self.cadastrar_documento(conn_DB, usuario, numero_documento, dtEmissao, validade, tipo_documento)
                         endereco = self.cadastrar_endereco(conn_DB, usuario, tipo_endereco, endereco, complemento, numero)
                         conn_DB.commit()
-                        print()
                         print(f"{datetime.now().strftime('%H:%M:%S')}: Usuário cadastrado!\n")
                     except Exception as error:
                         print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'

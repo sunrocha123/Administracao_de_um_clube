@@ -33,7 +33,7 @@ class Exclusao(object):
                 print(f'Usuário não localizado no banco de dados...\n'
                 f'Por gentileza, verificar...\n')
             else:
-                self.excluir_dados(conn_DB, idUsuario, nDocumento)
+                self.excluir_dados(conn_DB, idUsuario)
 
     def excluir_dados(self, conn_DB, idUsuario):
 
