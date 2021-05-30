@@ -1,5 +1,5 @@
 from Associado import Cadastro_associado, Atualizacao_associado, Exclusao_associado
-from Mensalidade import Cadastro_mensalidade
+from Mensalidade import Cadastro_mensalidade, Atualizacao_mensalidade
 from DB import configuracao
 
 class Menu(object):
@@ -65,7 +65,8 @@ class Menu(object):
                     caminho.coletar_dados()
                     break
                 elif opcao == 2:
-                    teste = 'aguardando código'
+                    caminho = Atualizacao_mensalidade.Atualizacao()
+                    caminho.validar_cadastro()
                     break
                 else:
                     print("Opção inválida! Digite novamente.....")    
