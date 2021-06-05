@@ -27,30 +27,30 @@ class Exclusao(object):
 
             #Validando se o usuário está cadastrado no banco de dados, com base no número do documento
             conn_DB.execute(f"SELECT ID_USUARIO FROM DOCUMENTO WHERE NUMERO = '{nDocumento}'")
-            idUsuario = conn_DB.fetchval()
+            IDassociado = conn_DB.fetchval()
 
-            if idUsuario == None:
+            if IDassociado == None:
                 print(f'Usuário não localizado no banco de dados...\n'
                 f'Por gentileza, verificar...\n')
             else:
-                self.excluir_dados(conn_DB, idUsuario)
+                self.excluir_dados(conn_DB, IDassociado)
 
-    def excluir_dados(self, conn_DB, idUsuario):
+    def excluir_dados(self, conn_DB, IDassociado):
 
         #Deletando o telefone do usuário do banco de dados
-        conn_DB.execute(f"DELETE FROM TELEFONE WHERE ID_USUARIO = {idUsuario}")
+        conn_DB.execute(f"DELETE FROM TELEFONE WHERE ID_USUARIO = {IDassociado}")
 
         #Deletando mensalidade do usuário do banco de dados
-        conn_DB.execute(f"DELETE FROM MENSALIDADE WHERE ID_USUARIO = {idUsuario}")
+        conn_DB.execute(f"DELETE FROM MENSALIDADE WHERE ID_USUARIO = {IDassociado}")
 
         #Deletando o documento do usuário do banco de dados
-        conn_DB.execute(f"DELETE FROM DOCUMENTO WHERE ID_USUARIO = {idUsuario}")
+        conn_DB.execute(f"DELETE FROM DOCUMENTO WHERE ID_USUARIO = {IDassociado}")
 
         #Deletando o endereço do usuário do banco de dados
-        conn_DB.execute(f"DELETE FROM ENDERECO WHERE ID_USUARIO = {idUsuario}")
+        conn_DB.execute(f"DELETE FROM ENDERECO WHERE ID_USUARIO = {IDassociado}")
 
         #Deletando o usuário do banco de dados
-        conn_DB.execute(f"DELETE FROM USUARIO WHERE ID = {idUsuario}")
+        conn_DB.execute(f"DELETE FROM USUARIO WHERE ID = {IDassociado}")
 
         conn_DB.commit()
 
