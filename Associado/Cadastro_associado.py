@@ -1,13 +1,18 @@
-import pyodbc
-import requests
 from datetime import date, datetime
 from DB import conexaoDB
-from Associado import Atualizacao_associado
+from Associado import Mecanismo
 
 class Cadastro(object):
 
     def conectar_DB(self):
         return conexaoDB.conectar()
+
+    '''
+    O caminho abaixo da acesso a engines de ajuste de data, coleta de endereço
+    e validação de cadastro
+    '''
+    def conectar_engines(self):
+        return Mecanismo.engines()
 
     def coletar_dados(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
@@ -34,41 +39,7 @@ class Cadastro(object):
                     print(f"{datetime.now().strftime('%H:%M:%S')}: Associado cadastrado!\n")
             except Exception as error:
                 print(f'\n{datetime.now().strftime("%H:%M:%S")}: {error}'
-                    f'\n\nNão foi possível cadastrar o associado. Estamos verificando o tema para solução do incidente!\n')  
-
-    def coletar_endereco(self):
-        try:           
-            cep = input('Digite o CEP *: ').strip()
-            print(f"\n{datetime.now().strftime('%H:%M:%S')}: "
-                f"Conectando a API....") 
-            response = requests.get(f'https://ws.apicep.com/cep/{cep}.json')
-            print(f"{datetime.now().strftime('%H:%M:%S')}: "
-                f"Conexão realizada com sucesso!")
-            return response.json()
-        except requests.exceptions.HTTPError as errh:
-            print(errh)
-        except requests.exceptions.ConnectionError as errc:
-            print(errc)
-        except requests.exceptions.Timeout as errt:
-            print(errt)
-        except requests.exceptions.RequestException as err:
-            print(err)
-
-        return 0
-
-    def validar_cadastro(self, conn_DB, numero_documento):
-
-        '''
-        Neste trecho, validaremos se o nº do documento informado já consta no banco de dados.
-        Caso já esteja, não será feita a inclusão do novo usuário. Caso contrário, daremos
-        sequência na inclusão.
-        '''  
-        conn_DB.execute(f"SELECT NUMERO FROM DOCUMENTO WHERE NUMERO = '{numero_documento}'")
-        validacao = conn_DB.fetchval()
-        if validacao == None:
-            return 1
-        else:
-            return 0            
+                    f'\n\nNão foi possível cadastrar o associado. Estamos verificando o tema para solução do incidente!\n')             
 
     def cadastrar_usuario(self, conn_DB):
 
@@ -146,7 +117,7 @@ class Cadastro(object):
                     elif opcao_tipo_documento == 2:
                         tipo_documento = 'CPF'
                     elif opcao_tipo_documento == 3:
-                        tipo_documento == 'Carteira de trabalho'
+                        tipo_documento = 'Carteira de trabalho'
                     elif opcao_tipo_documento == 4:
                         tipo_documento = 'Titulo de eleitor'
                     else:
@@ -158,19 +129,16 @@ class Cadastro(object):
         numero_documento = input('Digite o número do documento *: ').strip()
 
         #Validar se o usuário já encontra-se no banco de dados
-        if self.validar_cadastro(conn_DB, numero_documento) == 0:
+        if self.conectar_engines().validar_cadastro(conn_DB, numero_documento) == 0:
             print(f'O associado de documento {tipo_documento}: {numero_documento} já está cadastrado\n'
                 f'Por gentileza, rever as informações coletadas...\n')
             return 0
         else:
 
-            #caminho para coleta de datas
-            caminho = Atualizacao_associado.Atualizacao()
-
             print('\nData de emissão')
-            dtEmissao = caminho.ajustarData()
+            dtEmissao = self.conectar_engines().ajustarData()
             print('\nValidade')
-            validade = caminho.ajustarData()
+            validade = self.conectar_engines().ajustarData()
 
             if dtEmissao == '':
                 dtEmissao = None
@@ -192,7 +160,8 @@ class Cadastro(object):
         print('=========================\n')
 
         '''Tendo o CEP, será coletado o endereço completo via API'''
-        endereco = self.coletar_endereco()
+        endereco = self.conectar_engines().coletar_endereco()
+
         if endereco == 0:
             print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
             f'Por gentileza, tente mais tarde...')

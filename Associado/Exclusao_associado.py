@@ -1,4 +1,3 @@
-import pyodbc
 from datetime import date, datetime
 from DB import conexaoDB
 

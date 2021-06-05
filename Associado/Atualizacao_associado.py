@@ -1,12 +1,18 @@
-import pyodbc
 from datetime import date, datetime
 from DB import conexaoDB
-from Associado import Cadastro_associado
+from Associado import Mecanismo, Cadastro_associado
 
 class Atualizacao(object):
 
     def conectar_DB(self):
         return conexaoDB.conectar()
+
+    '''
+    O caminho abaixo da acesso a engines de ajuste de data, coleta de endereço
+    e validação de cadastro
+    '''
+    def conectar_engines(self):
+        return Mecanismo.engines()
 
     def validar_cadastro(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
@@ -23,41 +29,89 @@ class Atualizacao(object):
             Caso esteja cadastrado, coletaremos o ID do cliente para realizar as atualizações necessárias.
 
             '''
-            print(f'\nPontos de atenção:\n'
+            print(f'Pontos de atenção:\n'
                     f'1. Para número de documento ou telefone, digitar sem espaço e traço\n'
                     f'2. Para o campo de CEP, digitar no formato 00000-000\n')
                     
-            print('\nAntes de seguirmos com a atualização, precisamos realizar uma validação...\n')
+            print('Antes de seguirmos com a atualização, precisamos realizar uma validação...')
 
             n_documento = input('Digite o número do documento do associado: ').strip()
 
             conn_DB.execute(f"SELECT ID_USUARIO FROM DOCUMENTO WHERE NUMERO = '{n_documento}'")
-            IDusuario = conn_DB.fetchval()       
+            IDassociado = conn_DB.fetchval()       
 
-            if IDusuario == None:
+            if IDassociado == None:
                 print(f'Usuário não localizado no banco de dados...\n'
                     f'Por gentileza, verificar...\n')
             
             else:
-                self.escolher_setor_de_atualizacao(conn_DB, IDusuario, n_documento)
+                '''
+                Validar deseja atrelar um novo conjunto de dados ao associado
+                ou atualizar um conjunto de dados já existente
+                '''
+                print(f'\n============================='
+                        f'\nAÇÕES DISPONÍVEIS\n'
+                        f'=============================\n')
+
+                print(f'1. Adicionar novos dados a um associado existente\n'
+                    f'2. Atualizar dados de um associado existente\n')
+
+                while True:
+                    try:
+                        acaoDesejada = int(input('Digite a opção desejada: '))
+                        if acaoDesejada < 1 or acaoDesejada > 2:
+                            print("Opção inválida! Digite novamente....")
+                        elif acaoDesejada == 1:
+                            self.escolher_setor_novos_dados(conn_DB, IDassociado)
+                            break
+                        else:
+                            self.escolher_setor_de_atualizacao(conn_DB, IDassociado, n_documento)
+                            break
+                    except ValueError:
+                        print("Opção inválida! Digite novamente....")
         pass
 
-    def escolher_setor_de_atualizacao(self, conn_DB, IDusuario, n_documento):
+    def escolher_setor_novos_dados(self, conn_DB, IDassociado):
+        print('\n1. Telefone\n2. Documento\n3. Endereço\n')
+        #Caminho para cadastro das informações
+        caminho = Cadastro_associado.Cadastro()
+        while True:
+            try:
+                opcaoDesejada = int(input('Digite a opção desejada para cadastrar novos dados: '))
+                if opcaoDesejada < 1 or opcaoDesejada > 3:
+                    print("Opção inválida! Digite novamente....")
+                elif opcaoDesejada == 1:
+                    caminho.cadastrar_telefone(IDassociado, conn_DB)
+                    break
+                elif opcaoDesejada == 2:
+                    caminho.cadastrar_documento(conn_DB, IDassociado)
+                    break
+                else:
+                    caminho.cadastrar_endereco(conn_DB, IDassociado)
+                    break
+            except ValueError:
+                print("Opção inválida! Digite novamente....")
+
+        conn_DB.commit()
+        print(f"\n{datetime.now().strftime('%H:%M:%S')}: Informação cadastrada!\n")
+        pass
+
+    def escolher_setor_de_atualizacao(self, conn_DB, IDassociado, n_documento):
         print('\nÁreas de alteração\n\n1. Usuário\n2. Documento\n3. Telefone\n4. Endereço\n')
         while True:
             try:
                 opcao = int(input('Digite a opção desejada (1-4): '))
                 if opcao == 1:
-                    self.atualizar_usuario(conn_DB, IDusuario)
+                    self.atualizar_usuario(conn_DB, IDassociado)
                     break
                 elif opcao == 2:
-                    self.atualizar_documento(conn_DB, IDusuario, n_documento)
+                    self.atualizar_documento(conn_DB, IDassociado, n_documento)
                     break
                 elif opcao == 3:
-                    self.atualizar_telefone(conn_DB, IDusuario)
+                    self.atualizar_telefone(conn_DB, IDassociado)
                     break
                 elif opcao == 4:
-                    self.atualizar_endereco(conn_DB, IDusuario)
+                    self.atualizar_endereco(conn_DB, IDassociado)
                     break
                 else:
                     print("Opção inválida! Digite novamente....")    
@@ -67,7 +121,7 @@ class Atualizacao(object):
         print(f"{datetime.now().strftime('%H:%M:%S')}: Informação atualizada!\n")         
         pass
 
-    def atualizar_usuario(self, conn_DB, IDusuario):
+    def atualizar_usuario(self, conn_DB, IDassociado):
         print('\n1. Nome\n2. Sobrenome\n3. Número de dependentes\n')
         while True:
             try:
@@ -79,7 +133,7 @@ class Atualizacao(object):
                             break
                         except ValueError:
                             print('Opção inválida! Digite novamente.....')
-                    conn_DB.execute(f"UPDATE USUARIO SET N_DEPENDENTES = {novaInformacao} WHERE ID = {IDusuario}")
+                    conn_DB.execute(f"UPDATE USUARIO SET N_DEPENDENTES = {novaInformacao} WHERE ID = {IDassociado}")
                     break
                 elif opcao == 1 or opcao == 2:
                     novaInformacao = input('Digite a nova informação: ').lower().strip()
@@ -87,14 +141,14 @@ class Atualizacao(object):
                         coluna = 'NOME'
                     elif opcao == 2:
                         coluna = 'SOBRENOME'
-                    conn_DB.execute(f"UPDATE USUARIO SET {coluna} = '{novaInformacao}' WHERE ID = {IDusuario}")
+                    conn_DB.execute(f"UPDATE USUARIO SET {coluna} = '{novaInformacao}' WHERE ID = {IDassociado}")
                     break
                 else:
                     print('Opção inválida! Digite novamente.....')
             except ValueError:
                 print('Opção inválida! Digite novamente.....')
 
-    def atualizar_documento(self, conn_DB, IDusuario, n_documento):
+    def atualizar_documento(self, conn_DB, IDassociado, n_documento):
         print('\n1. Tipo de documento\n2. Numero\n3. Data de emissão\n4. Validade\n')
 
         while True:
@@ -122,18 +176,18 @@ class Atualizacao(object):
                     idTipoDocumento = conn_DB.fetchval()
 
                     #Atualizando tipo de documento do usuário
-                    conn_DB.execute(f"UPDATE DOCUMENTO SET ID_TIPO_DOCUMENTO = {idTipoDocumento} WHERE ID_USUARIO = {IDusuario} AND NUMERO = '{n_documento}'")
+                    conn_DB.execute(f"UPDATE DOCUMENTO SET ID_TIPO_DOCUMENTO = {idTipoDocumento} WHERE ID_USUARIO = {IDassociado} AND NUMERO = '{n_documento}'")
                     break
                 elif opcao == 3 or opcao == 4:
-                    dataAtualizada = self.ajustarData()
+                    dataAtualizada = self.conectar_engines().ajustarData()
                     if opcao == 3:
-                        conn_DB.execute(f"UPDATE DOCUMENTO SET DTEMISSAO = '{dataAtualizada}' WHERE ID_USUARIO = {IDusuario} AND NUMERO = '{n_documento}'")
+                        conn_DB.execute(f"UPDATE DOCUMENTO SET DTEMISSAO = '{dataAtualizada}' WHERE ID_USUARIO = {IDassociado} AND NUMERO = '{n_documento}'")
                     else:
-                        conn_DB.execute(f"UPDATE DOCUMENTO SET VALIDADE = '{dataAtualizada}' WHERE ID_USUARIO = {IDusuario} AND NUMERO = '{n_documento}'")
+                        conn_DB.execute(f"UPDATE DOCUMENTO SET VALIDADE = '{dataAtualizada}' WHERE ID_USUARIO = {IDassociado} AND NUMERO = '{n_documento}'")
                     break
                 elif opcao == 2:
                     novaInformacao = input('Digite a nova informação: ').strip()
-                    conn_DB.execute(f"UPDATE DOCUMENTO SET NUMERO = '{novaInformacao}' WHERE ID_USUARIO = {IDusuario} AND NUMERO = '{n_documento}'")
+                    conn_DB.execute(f"UPDATE DOCUMENTO SET NUMERO = '{novaInformacao}' WHERE ID_USUARIO = {IDassociado} AND NUMERO = '{n_documento}'")
                     break
                 else:
                     print('Opção inválida! Digite novamente.....')
@@ -141,164 +195,66 @@ class Atualizacao(object):
                 print('Opção inválida! Digite novamente.....')
         pass
 
-    def ajustarData(self):
-        '''
-        Está função tem como objetivo, arrumar a data informada pelo usuário
-        no padrão YYYY-MM-DD para cadastro no banco de dados
-        '''
-        dataAjustada = ''
-
-        dia = input('Digite o dia no formato DD: ')
-        mes = input('Digite o mês no formato MM: ')
-        ano = input('Digite o ano no formato YYYY: ')
-        if dia != '' and mes != '' and ano != '':
-            dataAjustada = ano + '-' + mes + '-' + dia
-        return dataAjustada
-
-    def atualizar_endereco(self, conn_DB, IDusuario):
+    def atualizar_endereco(self, conn_DB, IDassociado):
         print('\n1. Tipo de endereço\n2. Número\n3. Complemento\n4. Endereço com base em um novo CEP\n')
 
         while True:
-            try:
-                opcao = int(input('Digite a opção desejada (1-4): '))
-                if opcao == 1:
-                    print('\nTipos de endereços disponíveis\n')
-                    tEnderecos = ['Residencial', 'Corporativo']
 
-                    for i in range(len(tEnderecos)):
-                        print(str(i + 1) + ". " + tEnderecos[i])
-                    print()
-                    while True:
-                        try:
-                            novaInformacao = int(input('Digite a nova informação (1-2): '))
-                            if novaInformacao < 1 or novaInformacao > 2:
-                                print('Opção inválida! Digite novamente.....')
+            CEPcadastrado = input('Digite o CEP do endereço que deseja atualizar: ')
+            conn_DB.execute(f"SELECT ID_CEP FROM ENDERECO INNER JOIN CEP ON ENDERECO.ID_CEP = CEP.ID WHERE ID_USUARIO = {IDassociado} AND CEP.NUMERO = '{CEPcadastrado}'")
+            IDcep = conn_DB.fetchval()  
+
+            if IDcep == None:
+                print('CEP não localizado...\nPor gentileza, digitar novamente!\n')
+        
+            else:
+                while True:
+                    try:
+                        opcao = int(input('Digite a opção desejada (1-4): '))
+                        if opcao == 1:
+                            print('\nTipos de endereços disponíveis\n')
+                            tEnderecos = ['Residencial', 'Corporativo']
+
+                            for i in range(len(tEnderecos)):
+                                print(str(i + 1) + ". " + tEnderecos[i])
+                            print()
+                            while True:
+                                try:
+                                    novaInformacao = int(input('Digite a nova informação (1-2): '))
+                                    if novaInformacao < 1 or novaInformacao > 2:
+                                        print('Opção inválida! Digite novamente.....')
+                                    else:
+                                        break
+                                except ValueError:
+                                    print('Opção inválida! Digite novamente.....')
+
+                            #Coletar ID do tipo de endereço no banco de dados
+                            conn_DB.execute(f"SELECT ID FROM TIPO_ENDERECO WHERE NOME = '{tEnderecos[novaInformacao - 1]}'")
+                            idTipoEndereco = conn_DB.fetchval()
+
+                            #Atualizando tipo de endereço do usuário
+                            conn_DB.execute(f"UPDATE ENDERECO SET ID_TIPO_ENDERECO = {idTipoEndereco} WHERE ID_USUARIO = {IDassociado} AND ID_CEP = {IDcep}")
+                            break
+                        elif opcao == 2 or opcao == 3:
+                            novaInformacao = input('Digite a nova informação: ').strip()
+                            if opcao == 2:
+                                coluna = 'NUMERO'
                             else:
-                                break
-                        except ValueError:
+                                coluna = 'COMPLEMENTO'
+                            conn_DB.execute(f"UPDATE ENDERECO SET {coluna} = '{novaInformacao}' WHERE ID_USUARIO = {IDassociado} AND ID_CEP = {IDcep}")
+                            break
+                        elif opcao == 4:
+                            caminho = Cadastro_associado.Cadastro()
+                            caminho.cadastrar_endereco(conn_DB, IDassociado)
+                            break
+                        else:
                             print('Opção inválida! Digite novamente.....')
-
-                    #Coletar ID do tipo de endereço no banco de dados
-                    conn_DB.execute(f"SELECT ID FROM TIPO_ENDERECO WHERE NOME = '{tEnderecos[novaInformacao - 1]}'")
-                    idTipoEndereco = conn_DB.fetchval()
-
-                    #Atualizando tipo de endereço do usuário
-                    conn_DB.execute(f"UPDATE ENDERECO SET ID_TIPO_ENDERECO = {idTipoEndereco} WHERE ID_USUARIO = {IDusuario}")
-                    break
-                elif opcao == 2 or opcao == 3:
-                    novaInformacao = input('Digite a nova informação: ').strip()
-                    if opcao == 2:
-                        coluna = 'NUMERO'
-                    else:
-                        coluna = 'COMPLEMENTO'
-                    conn_DB.execute(f"UPDATE ENDERECO SET {coluna} = '{novaInformacao}' WHERE ID_USUARIO = {IDusuario}")
-                    break
-                elif opcao == 4:
-                    caminho = Cadastro_associado.Cadastro()
-                    enderecoAtualizado = caminho.coletar_endereco()
-                    if enderecoAtualizado == 0:
-                        print(f'Desculpe, estamos com problemas técnicos em nossa ferramenta no momento\n'
-                        f'Por gentileza, tente mais tarde...')
-                    else:
-                        print(f'\nEndereço localizado:\n'
-                                f'Logradouro: {enderecoAtualizado["address"]}\n'
-                                f'Cidade: {enderecoAtualizado["city"]}\n'
-                                f'Estado: {enderecoAtualizado["state"]}\n'
-                                f'Bairro: {enderecoAtualizado["district"]}\n'
-                                f'CEP: {enderecoAtualizado["code"]}\n')
-
-                        '''
-                        Será validado em primeiro momento se o novo endereço já encontrasse cadastrado no banco
-                        de dados. Caso esteja, será coletado apenas o ID do CEP, para associar ao usuário. Caso
-                        contrário, o endereço será cadastrado no banco de dados e associado ao usuário
-                        '''
-
-                        #Validando se o CEP está cadastrado no banco de dados
-                        conn_DB.execute(f"SELECT ID FROM CEP WHERE NUMERO = '{enderecoAtualizado['code']}'")
-                        idCEP = conn_DB.fetchval()
-
-                        if idCEP == None:
-                            #Validando se UF já encontrasse cadastrada
-                            conn_DB.execute(f"SELECT ID FROM UF WHERE SIGLA = '{enderecoAtualizado['state']}'")
-                            IDuf = conn_DB.fetchval()
-
-                            if IDuf == None:
-                                #Cadastrando UF
-                                conn_DB.execute("INSERT INTO UF VALUES (?)",
-                                                enderecoAtualizado['state'])
-
-                                #Coletando o ID da UF cadastrada
-                                conn_DB.execute("SELECT MAX(ID) FROM UF")
-                                IDuf = conn_DB.fetchval()
-
-                            #Validando se cidade já encontrasse cadastrada
-                            conn_DB.execute(f"SELECT ID FROM CIDADE WHERE NOME = '{enderecoAtualizado['city']}'")
-                            IDcidade = conn_DB.fetchval()
-
-                            if IDcidade == None:
-                                #Cadastrando Cidade
-                                conn_DB.execute("INSERT INTO CIDADE VALUES (?,?)",
-                                                IDuf, enderecoAtualizado['city'])
-
-                                #Coletando o ID da cidade cadastrada
-                                conn_DB.execute("SELECT MAX(ID) FROM CIDADE")
-                                IDcidade = conn_DB.fetchval()
-
-                            #Validando se bairro já encontrasse cadastrada
-                            conn_DB.execute(f"SELECT ID FROM BAIRRO WHERE NOME = '{enderecoAtualizado['district']}'")
-                            IDbairro = conn_DB.fetchval()
-
-                            if IDbairro == None:
-                                #Cadastrando Bairro
-                                conn_DB.execute("INSERT INTO BAIRRO VALUES (?,?)",
-                                                IDcidade, enderecoAtualizado['district'])
-
-                                #Coletando o ID do bairro cadastrado
-                                conn_DB.execute("SELECT MAX(ID) FROM BAIRRO")
-                                IDbairro = conn_DB.fetchval()
-
-                            '''A API não encaminha o tipo e nome de logradouro já separado, desta forma,
-                            o loop abaixo fará está separação e guardará dentro de duas variáveis.
-                            '''
-                            for i in range(len(enderecoAtualizado['address'])):
-                                if enderecoAtualizado['address'][i] == " ":
-                                    Tipologradouro = enderecoAtualizado['address'][0:i]
-                                    Nomelogradouro = enderecoAtualizado['address'][i + 1:]
-                                    break
-
-                            #Validando se tipo de logradouro já encontrasse cadastrada
-                            conn_DB.execute(f"SELECT ID FROM TIPO_LOGRADOURO WHERE NOME = '{Tipologradouro}'")
-                            IDtipo_logradouro = conn_DB.fetchval()
-
-                            if IDtipo_logradouro == None:
-                                #Cadastrando Tipo de logradouro
-                                conn_DB.execute("INSERT INTO TIPO_LOGRADOURO VALUES (?,?)",
-                                                IDbairro, Tipologradouro)
-
-                                #Coletando o ID do tipo de logradouro
-                                conn_DB.execute("SELECT MAX(ID) FROM TIPO_LOGRADOURO")
-                                IDtipo_logradouro = conn_DB.fetchval()
-
-                            #Cadastrando o Nome do logradouro
-                            conn_DB.execute("INSERT INTO NOME_LOGRADOURO VALUES (?,?)",
-                                            IDtipo_logradouro, Nomelogradouro)
-
-                            #Cadastrando o CEP
-                            conn_DB.execute("INSERT INTO CEP VALUES (?)",
-                                            enderecoAtualizado['code'])
-
-                            #Coletando o ID do CEP
-                            conn_DB.execute("SELECT MAX(ID) FROM CEP")
-                            idCEP = conn_DB.fetchval()
-                            conn_DB.execute(f"UPDATE ENDERECO SET ID_CEP = {idCEP} WHERE ID_USUARIO = {IDusuario}")
-                        break
-                else:
-                    print('Opção inválida! Digite novamente.....')
-            except ValueError:
-                print('Opção inválida! Digite novamente.....')
+                    except ValueError:
+                        print('Opção inválida! Digite novamente.....')
+                break
         pass
 
-    def atualizar_telefone(self, conn_DB, IDusuario):
+    def atualizar_telefone(self, conn_DB, IDassociado):
         print('\n1. Tipo de telefone\n2. DDD\n3. Número do telefone\n')
 
         ddd = input('Digite o DDD do telefone cadastrado: ')
@@ -326,7 +282,7 @@ class Atualizacao(object):
                     idTipoTelefone = conn_DB.fetchval()
 
                     #Atualizando tipo de telefone do usuário
-                    conn_DB.execute(f"UPDATE TELEFONE SET ID_TIPO_TELEFONE = {idTipoTelefone} WHERE ID_USUARIO = {IDusuario} AND DDD = '{ddd}' AND N_TELEFONE = '{nTelefone}'")
+                    conn_DB.execute(f"UPDATE TELEFONE SET ID_TIPO_TELEFONE = {idTipoTelefone} WHERE ID_USUARIO = {IDassociado} AND DDD = '{ddd}' AND N_TELEFONE = '{nTelefone}'")
                     break
                 elif opcao == 2 or opcao == 3:
                     novaInformacao = input('Digite a nova informação: ').strip()
@@ -334,7 +290,7 @@ class Atualizacao(object):
                         coluna = 'DDD'
                     else:
                         coluna = 'N_TELEFONE'
-                    conn_DB.execute(f"UPDATE TELEFONE SET {coluna} = '{novaInformacao}' WHERE ID_USUARIO = {IDusuario} AND DDD = '{ddd}' AND N_TELEFONE = '{nTelefone}'")
+                    conn_DB.execute(f"UPDATE TELEFONE SET {coluna} = '{novaInformacao}' WHERE ID_USUARIO = {IDassociado} AND DDD = '{ddd}' AND N_TELEFONE = '{nTelefone}'")
                     break
                 else:
                     print('Opção inválida! Digite novamente.....')
