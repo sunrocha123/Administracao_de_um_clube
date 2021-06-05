@@ -28,9 +28,9 @@ class Menu(object):
                 print('Opção inválida! Digite novamente..')
                 
     def escolher_opcao_inventario_associado(self):
-        print(f'\n1. Associar novo usuário\n'
-            f'2. Alterar dados de usuário\n'
-            f'3. Deletar usuário\n')
+        print(f'\n1. Novo associado\n'
+            f'2. Manutenção cadastral de associado\n'
+            f'3. Deletar associado\n')
 
         while True:
             try:
