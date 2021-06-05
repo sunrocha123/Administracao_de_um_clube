@@ -1,12 +1,18 @@
-import pyodbc
 from datetime import date, datetime
 from DB import conexaoDB
-from Associado import Atualizacao_associado
+from Associado import Mecanismo
 
 class Cadastro(object):
 
     def conectar_DB(self):
         return conexaoDB.conectar()
+
+    '''
+    O caminho abaixo da acesso a engines de ajuste de data, coleta de endereço
+    e validação de cadastro
+    '''
+    def conectar_engines(self):
+        return Mecanismo.engines()
 
     def coletar_dados(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
@@ -42,16 +48,14 @@ class Cadastro(object):
                     f'Por gentileza, verificar...\n')
 
             else:
-                #caminho para coleta de datas
-                caminho = Atualizacao_associado.Atualizacao()
                 print('\n=========================')
                 print('INFORMAÇÕES PARA CADASTRO')
                 print('=========================\n')
                 valor = float(input('Digite o valor da mensalidade *: '))
                 print('\nData de vencimento *')
-                dtVencimento = caminho.ajustarData()
+                dtVencimento = self.conectar_engines().ajustarData()
                 print('\nData de pagamento')
-                dtPagamento = caminho.ajustarData()
+                dtPagamento = self.conectar_engines().ajustarData()
 
                 if dtPagamento == '':
                     dtPagamento = None

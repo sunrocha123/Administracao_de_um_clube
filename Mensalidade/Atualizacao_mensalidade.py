@@ -1,12 +1,18 @@
-import pyodbc
 from datetime import date, datetime
 from DB import conexaoDB
-from Associado import Atualizacao_associado
+from Associado import Mecanismo
 
 class Atualizacao(object):
 
     def conectar_DB(self):
         return conexaoDB.conectar()
+
+    '''
+    O caminho abaixo da acesso a engines de ajuste de data, coleta de endereço
+    e validação de cadastro
+    '''
+    def conectar_engines(self):
+        return Mecanismo.engines()
 
     def validar_cadastro(self):
         print(f'\n{datetime.now().strftime("%H:%M:%S")}: '
@@ -61,8 +67,7 @@ class Atualizacao(object):
             try:
                 opcao = int(input('Digite a opção desejada (1-3): '))
                 if opcao == 1 or opcao == 2:
-                    caminho = Atualizacao_associado.Atualizacao()
-                    dataAtualizada = caminho.ajustarData()
+                    dataAtualizada = self.conectar_engines().ajustarData()
                     if opcao == 1:
                         conn_DB.execute(f"UPDATE MENSALIDADE SET DTVENCIMENTO = '{dataAtualizada}' WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDusuario}")
                     else:
