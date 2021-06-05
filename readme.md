@@ -4,7 +4,7 @@
 
 #Diagrama Database
 
-<img src="DB/Estrutura do database.png"/>
+<img src="diagrama banco de dados.png"/>
 
 #Manual Software
 
