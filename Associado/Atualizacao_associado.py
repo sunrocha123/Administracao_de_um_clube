@@ -196,7 +196,6 @@ class Atualizacao(object):
         pass
 
     def atualizar_endereco(self, conn_DB, IDassociado):
-        print('\n1. Tipo de endereço\n2. Número\n3. Complemento\n4. Endereço com base em um novo CEP\n')
 
         while True:
 
@@ -208,6 +207,7 @@ class Atualizacao(object):
                 print('CEP não localizado...\nPor gentileza, digitar novamente!\n')
         
             else:
+                print('\n1. Tipo de endereço\n2. Número\n3. Complemento\n4. Endereço com base em um novo CEP\n')
                 while True:
                     try:
                         opcao = int(input('Digite a opção desejada (1-4): '))
@@ -255,11 +255,11 @@ class Atualizacao(object):
         pass
 
     def atualizar_telefone(self, conn_DB, IDassociado):
-        print('\n1. Tipo de telefone\n2. DDD\n3. Número do telefone\n')
 
         ddd = input('Digite o DDD do telefone cadastrado: ')
         nTelefone = input('Digite o número do telefone cadastrado: ')
 
+        print('\n1. Tipo de telefone\n2. DDD\n3. Número do telefone\n')
         while True:
             try:
                 opcao = int(input('Digite a opção desejada (1-3): '))
