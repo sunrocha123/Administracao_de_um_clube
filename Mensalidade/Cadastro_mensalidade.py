@@ -40,10 +40,10 @@ class Cadastro(object):
             nDocumento = input('Digite o número do documento do associado: ').strip()
 
             #Validando se o usuário existe no banco de dados, com base no seu número de documento
-            conn_DB.execute(f"SELECT ID FROM DOCUMENTO WHERE NUMERO = '{nDocumento}'")
-            idUsuario = conn_DB.fetchval()
+            conn_DB.execute(f"SELECT ID_USUARIO FROM DOCUMENTO WHERE NUMERO = '{nDocumento}'")
+            IDassociado = conn_DB.fetchval()
 
-            if idUsuario == None:
+            if IDassociado == None:
                 print(f'Usuário não localizado no banco de dados, desta forma, não é possível seguir com o cadastrado da mensalidade\n'
                     f'Por gentileza, verificar...\n')
 
@@ -60,14 +60,14 @@ class Cadastro(object):
                 if dtPagamento == '':
                     dtPagamento = None
 
-                self.cadastrar_mensalidade(conn_DB, dtVencimento, valor, dtPagamento, idUsuario)
+                self.cadastrar_mensalidade(conn_DB, dtVencimento, valor, dtPagamento, IDassociado)
                 print(f'{datetime.now().strftime("%H:%M:%S")}: '
                 f'Mensalidade cadastrada!\n')
 
-    def cadastrar_mensalidade(self, conn_DB, dtVencimento, valor, dtPagamento, idUsuario):
+    def cadastrar_mensalidade(self, conn_DB, dtVencimento, valor, dtPagamento, IDassociado):
 
         #Cadastrando mensalidade
         conn_DB.execute("INSERT INTO MENSALIDADE VALUES (?,?,?,?)",
-                        idUsuario, dtVencimento, dtPagamento, valor)
+                        IDassociado, dtVencimento, dtPagamento, valor)
         conn_DB.commit()
         pass

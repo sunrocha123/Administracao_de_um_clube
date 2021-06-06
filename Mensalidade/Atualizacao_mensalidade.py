@@ -37,26 +37,27 @@ class Atualizacao(object):
             print('========================\n')
 
             n_documento = input('Digite o número do documento do associado: ').strip()
-            dtVencimento = input('Digite a data de vencimento da mensalidade cadastrada: ').strip()
+            print('\nData de vencimento da mensalidade cadastrada')
+            dtVencimento = self.conectar_engines().ajustarData()
 
             #Validando se o usuário está cadastrado no banco de dados, com base no número do seu documento
             conn_DB.execute(f"SELECT ID_USUARIO FROM DOCUMENTO WHERE NUMERO = '{n_documento}'")
-            IDusuario = conn_DB.fetchval()
+            IDassociado = conn_DB.fetchval()
 
             #Validando se existe alguma mensalidade cadastrada no banco de dados, com base na data de vencimento informada
-            conn_DB.execute(f"SELECT ID FROM MENSALIDADE WHERE DTVENCIMENTO = '{dtVencimento}' AND ID_USUARIO = {IDusuario}")
+            conn_DB.execute(f"SELECT ID FROM MENSALIDADE WHERE DTVENCIMENTO = '{dtVencimento}' AND ID_USUARIO = {IDassociado}")
             IDmensalidade = conn_DB.fetchval()
 
-            if IDusuario == None:
+            if IDassociado == None:
                 print(f'Usuário não localizado no banco de dados...\n'
                     f'Por gentileza, verificar...\n')
-            elif IDusuario != None and IDmensalidade == None:
+            elif IDassociado != None and IDmensalidade == None:
                 print('Mensalidade não localizada no banco de dados...\n'
                     f'Por gentileza, verificar...\n')
             else:
-                self.atualizar_mensalidade(conn_DB, IDusuario, IDmensalidade)
+                self.atualizar_mensalidade(conn_DB, IDassociado, IDmensalidade)
 
-    def atualizar_mensalidade(self, conn_DB, IDusuario, IDmensalidade):
+    def atualizar_mensalidade(self, conn_DB, IDassociado, IDmensalidade):
 
         print('\n====================================')
         print('CAMPOS DISPONÍVEIS PARA ATUALIZAÇÃO')
@@ -69,13 +70,13 @@ class Atualizacao(object):
                 if opcao == 1 or opcao == 2:
                     dataAtualizada = self.conectar_engines().ajustarData()
                     if opcao == 1:
-                        conn_DB.execute(f"UPDATE MENSALIDADE SET DTVENCIMENTO = '{dataAtualizada}' WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDusuario}")
+                        conn_DB.execute(f"UPDATE MENSALIDADE SET DTVENCIMENTO = '{dataAtualizada}' WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDassociado}")
                     else:
-                        conn_DB.execute(f"UPDATE MENSALIDADE SET DTPAGAMENTO = '{dataAtualizada}' WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDusuario}")
+                        conn_DB.execute(f"UPDATE MENSALIDADE SET DTPAGAMENTO = '{dataAtualizada}' WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDassociado}")
                     break
                 elif opcao == 3:
                     valorAtualizado = float(input('Digite o valor atualizado: '))
-                    conn_DB.execute(f"UPDATE MENSALIDADE SET VALOR = {valorAtualizado} WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDusuario}")
+                    conn_DB.execute(f"UPDATE MENSALIDADE SET VALOR = {valorAtualizado} WHERE ID = {IDmensalidade} AND ID_USUARIO = {IDassociado}")
                     break
                 else:
                     print('Opção inválida! Digite novamente.....')
