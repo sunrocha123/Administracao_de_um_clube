@@ -55,7 +55,7 @@ class Menu(object):
 
     def escolher_opcao_mensalidade(self):
         print(f'\n1. Adicionar nova mensalidade\n'
-            f'2. Alterar dados de uma mensalidade\n')
+            f'2. Manutenção cadastral de uma mensalidade\n')
 
         while True:
             try:
